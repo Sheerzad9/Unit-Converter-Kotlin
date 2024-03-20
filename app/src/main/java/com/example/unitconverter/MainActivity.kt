@@ -31,9 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.unitconverter.ui.theme.UnitConverterTheme
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,11 +58,19 @@ class MainActivity : ComponentActivity() {
 fun UnitConverter(){
     var inputValue by remember { mutableStateOf("") };
     var outputValue by remember { mutableStateOf("") };
-    var inputUnit by remember { mutableStateOf("Centimeters") };
+    var inputUnit by remember { mutableStateOf("Meters") };
     var outputUnit by remember { mutableStateOf("Meters") };
     var iExpanded by remember { mutableStateOf(false) };
     var oExpanded by remember { mutableStateOf(false) };
-    val conversionFactor = remember { mutableStateOf(0.01) };
+    val iConversionFactor = remember { mutableStateOf(1.0) };
+    val oConversionFactor = remember { mutableStateOf(1.0) };
+
+    fun convertUnits() {
+        // '?:' is elvis operator
+        val inputValueDouble = inputValue.toDoubleOrNull() ?: 0.0;
+        val  result = (inputValueDouble * iConversionFactor.value * 100.0 / oConversionFactor.value).roundToInt() / 100.0;
+        outputValue = "${result}  ${outputUnit}";
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -68,16 +78,17 @@ fun UnitConverter(){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Inside column all the UI elements will be stacked vertically
-        Text(text = "Unit Converter");
+        Text(text = "Unit Converter", style = MaterialTheme.typography.headlineLarge, fontFamily = FontFamily.Monospace);
         Spacer(modifier = Modifier.height(16.dp));
         OutlinedTextField(value = inputValue, onValueChange = {
-              inputValue = it;
+              inputValue = it.trim();
+            convertUnits();
         }, placeholder = {Text(text = "Enter value")});
         Spacer(modifier = Modifier.height(16.dp));
 
         Row() {
-            Text(text = "From", modifier = Modifier.padding(55.dp, 0.dp, 100.dp, 8.dp));
-            Text(text = "To", modifier = Modifier.padding(5.dp, 0.dp, 140.dp, 8.dp));
+            Text(text = "From", modifier = Modifier.padding(55.dp, 0.dp, 100.dp, 8.dp), style = MaterialTheme.typography.bodyLarge, fontFamily = FontFamily.Monospace);
+            Text(text = "To", modifier = Modifier.padding(5.dp, 0.dp, 140.dp, 8.dp), style = MaterialTheme.typography.bodyLarge, fontFamily = FontFamily.Monospace);
         }
         Row {
             // Inside row all the UI elements will be stacked horizontally
@@ -91,19 +102,26 @@ fun UnitConverter(){
                     DropdownMenuItem(text = { Text(text = "Millimeters")}, onClick = {
                         iExpanded = false;
                         inputUnit = "Millimeters";
+                        iConversionFactor.value = 0.001;
+                        convertUnits();
                     })
                     DropdownMenuItem(text = { Text(text = "Centimeters")}, onClick = {
                         iExpanded = false;
                         inputUnit = "Centimeters";
-                        conversionFactor.value = 0.01;
+                        iConversionFactor.value = 0.01;
+                        convertUnits();
                     })
                     DropdownMenuItem(text = { Text(text = "Meters")}, onClick = {
                         iExpanded = false;
                         inputUnit = "Meters";
+                        iConversionFactor.value = 1.0;
+                        convertUnits();
                     })
                     DropdownMenuItem(text = { Text(text = "Feet")}, onClick = {
                         iExpanded = false;
                         inputUnit = "Feet";
+                        iConversionFactor.value = 0.3048;
+                        convertUnits();
                     })
                 }
             }
@@ -117,25 +135,34 @@ fun UnitConverter(){
                 DropdownMenu(expanded = oExpanded, onDismissRequest = { oExpanded = false }) {
                     DropdownMenuItem(text = { Text(text = "Millimeters")}, onClick = {
                         oExpanded = false;
-                        outputValue = "Millimeters";
+                        outputUnit = "Millimeters";
+                        oConversionFactor.value = 0.001;
+                        convertUnits();
                     })
                     DropdownMenuItem(text = { Text(text = "Centimeters")}, onClick = {
                         oExpanded = false;
-                        outputValue = "Centimeters";
+                        outputUnit = "Centimeters";
+                        oConversionFactor.value = 0.01;
+                        convertUnits();
                     })
                     DropdownMenuItem(text = { Text(text = "Meters")}, onClick = {
                         oExpanded = false;
-                        outputValue = "Meters";
+                        outputUnit = "Meters";
+                        oConversionFactor.value = 1.0;
+                        convertUnits();
                     })
                     DropdownMenuItem(text = { Text(text = "Feet")}, onClick = {
                         oExpanded = false;
-                        outputValue = "Feet";
+                        outputUnit = "Feet";
+                        oConversionFactor.value = 0.3048;
+                        convertUnits();
                     })
                 }
             }
         }
         Spacer(modifier = Modifier.height(16.dp));
-        Text(text = "Result: ${outputValue}");
+        Text(text = "Result: ${outputValue}",
+            style = MaterialTheme.typography.headlineMedium, fontFamily = FontFamily.Monospace);
     }
 }
 
